@@ -22,18 +22,8 @@ def is_valid_url(url):
 
 def download_video(url):
     ydl_opts = {
-        "format": "mp4/best",  # Forces MP4 to ensure metadata is intact
-        "merge_output_format": "mp4",  # Ensures correct container
+        "format": "best",
         "outtmpl": "downloads/%(title)s.%(ext)s",
-        "postprocessors": [
-            {
-                "key": "FFmpegMetadata",  # Ensures metadata (duration, codec, etc.) is embedded
-            },
-            {
-                "key": "FFmpegVideoConvertor",
-                "preferedformat": "mp4",
-            },
-        ],
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
