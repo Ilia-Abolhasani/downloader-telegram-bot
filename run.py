@@ -11,6 +11,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("bot_api_key")
 LOG_CHAT_ID = os.getenv("log_chat_id")
 LOG_TOPIC_ID = int(os.getenv("log_topic_id"))
+COOKIE_SESSION_ID = os.getenv("cookie_session_id")
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -25,9 +26,15 @@ def download_video(url):
         "format": "best",
         "outtmpl": "downloads/%(title)s.%(ext)s",
     }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        return ydl.prepare_filename(info)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            return ydl.prepare_filename(info)
+    except:
+        ydl_opts["http_headers"] = {"Cookie": f"sessionid={COOKIE_SESSION_ID}"}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            return ydl.prepare_filename(info)
 
 
 @bot.message_handler(commands=["start"])
@@ -39,7 +46,6 @@ def send_welcome(message):
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
     url = message.text.strip()
-
     # Log the message to the logger bot
     log_text = (
         f"👤 User: @{message.from_user.username or 'Unknown'}\n"
@@ -67,7 +73,9 @@ def handle_message(message):
 
         os.remove(video_path)  # Clean up after sending
     except Exception as e:
-        bot.reply_to(message, f"Error: {e}")
+        error_message = f"Error: {e}"
+        bot.reply_to(message, error_message)
+        bot.send_message(LOG_CHAT_ID, error_message, message_thread_id=LOG_TOPIC_ID)
 
 
 if __name__ == "__main__":
