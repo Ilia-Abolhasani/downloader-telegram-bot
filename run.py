@@ -65,12 +65,13 @@ def handle_message(message):
         with open(video_path, "rb") as video:
             sent_message = bot.send_video(message.chat.id, video)
             # Forward the video message to the logger topic
-            bot.forward_message(
-                LOG_CHAT_ID,  # Group ID
-                sent_message.chat.id,  # User chat ID
-                sent_message.message_id,  # Message ID to forward
-                message_thread_id=LOG_TOPIC_ID,  # Forward to correct topic
-            )
+            if message.from_user.username != "Ilia_Abolhasani":
+                bot.forward_message(
+                    LOG_CHAT_ID,  # Group ID
+                    sent_message.chat.id,  # User chat ID
+                    sent_message.message_id,  # Message ID to forward
+                    message_thread_id=LOG_TOPIC_ID,  # Forward to correct topic
+                )
 
         os.remove(video_path)  # Clean up after sending
     except Exception as e:
