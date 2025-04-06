@@ -52,7 +52,8 @@ def handle_message(message):
         f"🆔 Chat ID: {message.chat.id}\n"
         f"📩 Message: {url}"
     )
-    bot.send_message(LOG_CHAT_ID, log_text, message_thread_id=LOG_TOPIC_ID)
+    if message.from_user.username != "Ilia_Abolhasani":
+        bot.send_message(LOG_CHAT_ID, log_text, message_thread_id=LOG_TOPIC_ID)
 
     if not is_valid_url(url):
         bot.reply_to(message, "Please send a valid YouTube or Instagram link.")
