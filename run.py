@@ -60,7 +60,7 @@ def handle_message(message):
         bot.reply_to(message, "Please send a valid YouTube or Instagram link.")
         return
 
-    bot.reply_to(message, "Downloading... Please wait.")
+    downloading_msg = bot.reply_to(message, "Downloading... Please wait.")
     try:
         video_path = download_video(url)
         with open(video_path, "rb") as video:
@@ -79,6 +79,8 @@ def handle_message(message):
         error_message = f"Error: {e}"
         bot.reply_to(message, error_message)
         bot.send_message(LOG_CHAT_ID, error_message, message_thread_id=LOG_TOPIC_ID)
+
+    bot.delete_message(chat_id=message.chat.id, message_id=downloading_msg.message_id)
 
 
 if __name__ == "__main__":
