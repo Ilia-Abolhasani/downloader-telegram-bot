@@ -57,7 +57,7 @@ def handle_message(message):
         bot.send_message(LOG_CHAT_ID, log_text, message_thread_id=LOG_TOPIC_ID)
 
     if not is_valid_url(url):
-        bot.reply_to(message, "Please send a valid YouTube or Instagram link.")
+        bot.reply_to(message, "Please send a valid Instagram link.")
         return
 
     downloading_msg = bot.reply_to(message, "Downloading... Please wait.")
