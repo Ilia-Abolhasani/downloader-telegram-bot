@@ -26,16 +26,13 @@ def download_video(url):
         "format": "best",
         "outtmpl": "downloads/%(title)s.%(ext)s",
     }
+    ydl_opts["http_headers"] = {"Cookie": f"sessionid={COOKIE_SESSION_ID}"}
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             return ydl.prepare_filename(info)
     except:
-        # raise Exception("This video link is age-restricted or from a private account.")
-        ydl_opts["http_headers"] = {"Cookie": f"sessionid={COOKIE_SESSION_ID}"}
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            return ydl.prepare_filename(info)
+        raise Exception("This video link is age-restricted or from a private account.")
 
 
 @bot.message_handler(commands=["start"])
