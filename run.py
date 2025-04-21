@@ -47,7 +47,10 @@ def handle_message(message):
     # Log the message to the logger bot
     log_text = (
         f"👤 User: @{message.from_user.username or 'Unknown'}\n"
-        f"🆔 Chat ID: {message.chat.id}\n"
+        f"🆔 User ID: {message.from_user.id}\n"
+        f"📛 Name: {message.from_user.first_name or ''} {message.from_user.last_name or ''}\n"
+        f"🌐 Language: {message.from_user.language_code or 'Unknown'}\n"
+        f"💬 Chat ID: {message.chat.id}\n"
         f"📩 Message: {url}"
     )
     if message.from_user.username != "Ilia_Abolhasani":
