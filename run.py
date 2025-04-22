@@ -1,7 +1,7 @@
 import os
 import re
 import telebot
-import requests
+import json
 import yt_dlp
 from dotenv import load_dotenv
 
@@ -14,6 +14,44 @@ LOG_TOPIC_ID = int(os.getenv("log_topic_id"))
 COOKIE_SESSION_ID = os.getenv("cookie_session_id")
 
 bot = telebot.TeleBot(BOT_TOKEN)
+USER_DATA_FILE = "users_data.json"
+
+
+def load_user_data():
+    if os.path.exists(USER_DATA_FILE):
+        with open(USER_DATA_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+
+def save_user_data(data):
+    with open(USER_DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+
+def update_user_stats(user_id, success=False, invalid=False, error=False):
+    try:
+        data = load_user_data()
+
+        user_id = str(user_id)
+        if user_id not in data:
+            data[user_id] = {
+                "message_count": 0,
+                "success_count": 0,
+                "invalid_count": 0,
+                "error_count": 0,
+            }
+
+        data[user_id]["message_count"] += 1
+        if success:
+            data[user_id]["success_count"] += 1
+        if invalid:
+            data[user_id]["invalid_count"] += 1
+        if error:
+            data[user_id]["error_count"] += 1
+        save_user_data(data)
+    except:
+        pass
 
 
 def is_valid_url(url):
@@ -58,6 +96,7 @@ def handle_message(message):
 
     if not is_valid_url(url):
         bot.reply_to(message, "Please send a valid Instagram link.")
+        update_user_stats(message.from_user.id, invalid=True)
         return
 
     downloading_msg = bot.reply_to(message, "Downloading... Please wait.")
@@ -75,10 +114,12 @@ def handle_message(message):
                 )
 
         os.remove(video_path)  # Clean up after sending
+        update_user_stats(message.from_user.id, success=True)
     except Exception as e:
         error_message = f"Error: {e}"
         bot.reply_to(message, error_message)
         bot.send_message(LOG_CHAT_ID, error_message, message_thread_id=LOG_TOPIC_ID)
+        update_user_stats(message.from_user.id, error=True)
 
     bot.delete_message(chat_id=message.chat.id, message_id=downloading_msg.message_id)
 
