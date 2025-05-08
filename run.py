@@ -10,7 +10,9 @@ load_dotenv()
 # Replace with your actual Telegram bot token
 BOT_TOKEN = os.getenv("bot_api_key")
 LOG_CHAT_ID = os.getenv("log_chat_id")
-LOG_TOPIC_ID = int(os.getenv("log_topic_id"))
+LOG_SUCCESS_TOPIC_ID = int(os.getenv("log_success_topic_id"))
+LOG_INVALID_TOPIC_ID = int(os.getenv("log_invalid_topic_id"))
+LOG_ERROR_TOPIC_ID = int(os.getenv("log_error_topic_id"))
 COOKIE_SESSION_ID = os.getenv("cookie_session_id")
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -54,6 +56,11 @@ def update_user_stats(user_id, success=False, invalid=False, error=False):
         pass
 
 
+def log_to_topic(message, text, topic_id):
+    if message.from_user.username != "Ilia_Abolhasani":
+        bot.send_message(LOG_CHAT_ID, text, message_thread_id=topic_id)
+
+
 def is_valid_url(url):
     instagram_regex = r"(?:https?:\/\/)?(?:www\.)?instagram\.com"
     return re.search(instagram_regex, url)
@@ -91,11 +98,10 @@ def handle_message(message):
         f"💬 Chat ID: {message.chat.id}\n"
         f"📩 Message: {url}"
     )
-    if message.from_user.username != "Ilia_Abolhasani":
-        bot.send_message(LOG_CHAT_ID, log_text, message_thread_id=LOG_TOPIC_ID)
 
     if not is_valid_url(url):
         bot.reply_to(message, "Please send a valid Instagram link.")
+        log_to_topic(message, log_text, LOG_INVALID_TOPIC_ID)
         update_user_stats(message.from_user.id, invalid=True)
         return
 
@@ -105,20 +111,21 @@ def handle_message(message):
         with open(video_path, "rb") as video:
             sent_message = bot.send_video(message.chat.id, video)
             # Forward the video message to the logger topic
-            if message.from_user.username != "Ilia_Abolhasani":
-                bot.forward_message(
-                    LOG_CHAT_ID,  # Group ID
-                    sent_message.chat.id,  # User chat ID
-                    sent_message.message_id,  # Message ID to forward
-                    message_thread_id=LOG_TOPIC_ID,  # Forward to correct topic
-                )
+            log_to_topic(message, log_text, LOG_SUCCESS_TOPIC_ID)
+            bot.forward_message(
+                LOG_CHAT_ID,  # Group ID
+                sent_message.chat.id,  # User chat ID
+                sent_message.message_id,  # Message ID to forward
+                message_thread_id=LOG_SUCCESS_TOPIC_ID,  # Forward to correct topic
+            )
 
         os.remove(video_path)  # Clean up after sending
         update_user_stats(message.from_user.id, success=True)
     except Exception as e:
+        log_error_message = f"{log_text}\n\nError: {e}"
         error_message = f"Error: {e}"
         bot.reply_to(message, error_message)
-        bot.send_message(LOG_CHAT_ID, error_message, message_thread_id=LOG_TOPIC_ID)
+        log_to_topic(message, log_error_message, LOG_ERROR_TOPIC_ID)
         update_user_stats(message.from_user.id, error=True)
 
     bot.delete_message(chat_id=message.chat.id, message_id=downloading_msg.message_id)
