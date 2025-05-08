@@ -88,6 +88,11 @@ def send_welcome(message):
 
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
+    if message.chat.type != "private":
+        msg = message.text.strip()
+        if not msg.lower().startswith("download "):
+            return  # Ignore unrelated messages in groups
+
     url = message.text.strip()
     # Log the message to the logger bot
     log_text = (
