@@ -75,7 +75,12 @@ def download_video(url):
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            return ydl.prepare_filename(info)
+            if "playlist_count" in info and info["playlist_count"] > 1:
+                output = []
+                for item in info["entries"]:
+                    output.append(ydl.prepare_filename(item))
+                return output
+            return [ydl.prepare_filename(info)]
     except:
         raise Exception("This video link is age-restricted or from a private account.")
 
@@ -112,19 +117,23 @@ def handle_message(message):
 
     downloading_msg = bot.reply_to(message, "Downloading... Please wait.")
     try:
-        video_path = download_video(url)
-        with open(video_path, "rb") as video:
-            sent_message = bot.send_video(message.chat.id, video)
-            # Forward the video message to the logger topic
-            log_to_topic(message, log_text, LOG_SUCCESS_TOPIC_ID)
-            bot.forward_message(
-                LOG_CHAT_ID,  # Group ID
-                sent_message.chat.id,  # User chat ID
-                sent_message.message_id,  # Message ID to forward
-                message_thread_id=LOG_SUCCESS_TOPIC_ID,  # Forward to correct topic
-            )
-
-        os.remove(video_path)  # Clean up after sending
+        video_path_list = download_video(url)
+        for i in range(len(video_path_list)):
+            video_path = video_path_list[i]
+            with open(video_path, "rb") as video:
+                caption = ""
+                if len(video_path_list) > 1:
+                    caption = f"Part {i + 1}"
+                sent_message = bot.send_video(message.chat.id, video, caption=caption)
+                # Forward the video message to the logger topic
+                log_to_topic(message, log_text, LOG_SUCCESS_TOPIC_ID)
+                bot.forward_message(
+                    LOG_CHAT_ID,  # Group ID
+                    sent_message.chat.id,  # User chat ID
+                    sent_message.message_id,  # Message ID to forward
+                    message_thread_id=LOG_SUCCESS_TOPIC_ID,  # Forward to correct topic
+                )
+            os.remove(video_path)  # Clean up after sending
         update_user_stats(message.from_user.id, success=True)
     except Exception as e:
         log_error_message = f"{log_text}\n\nError: {e}"
