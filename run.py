@@ -81,7 +81,7 @@ def download_video(url):
                     output.append(ydl.prepare_filename(item))
                 return output
             return [ydl.prepare_filename(info)]
-    except Exception as err:
+    except:
         raise Exception("This video link is age-restricted or from a private account.")
 
 
