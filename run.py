@@ -69,6 +69,7 @@ def is_valid_url(url):
 def download_video(url):
     ydl_opts = {
         "format": "best",
+        "proxy": "socks5://127.0.0.1:9050",
         "outtmpl": "downloads/%(title)s.%(ext)s",
     }
     ydl_opts["http_headers"] = {"Cookie": f"sessionid={COOKIE_SESSION_ID}"}
