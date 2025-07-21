@@ -15,6 +15,7 @@ LOG_INVALID_TOPIC_ID = int(os.getenv("log_invalid_topic_id"))
 LOG_ERROR_TOPIC_ID = int(os.getenv("log_error_topic_id"))
 COOKIE_SESSION_ID = os.getenv("cookie_session_id")
 
+ALLOWED_USER = ["Ilia_Abolhasani", "azsh74"]
 bot = telebot.TeleBot(BOT_TOKEN)
 USER_DATA_FILE = "users_data.json"
 
@@ -69,7 +70,6 @@ def is_valid_url(url):
 def download_video(url):
     ydl_opts = {
         "format": "best",
-        "proxy": "socks5://127.0.0.1:9050",
         "outtmpl": "downloads/%(title)s.%(ext)s",
     }
     ydl_opts["http_headers"] = {"Cookie": f"sessionid={COOKIE_SESSION_ID}"}
@@ -88,6 +88,8 @@ def download_video(url):
 
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
+    if message.from_user.username not in ALLOWED_USER:
+        return
     text = """Send me an Instagram link, and I'll download the video for you!"""
     bot.reply_to(message, text)
 
@@ -99,6 +101,8 @@ def handle_message(message):
         if not msg.lower().startswith("download "):
             return  # Ignore unrelated messages in groups
 
+    if message.from_user.username not in ALLOWED_USER:
+        return
     url = message.text.strip()
     # Log the message to the logger bot
     log_text = (
