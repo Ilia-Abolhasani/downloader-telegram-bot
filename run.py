@@ -1,8 +1,9 @@
 import os
 import re
-import telebot
 import json
+import random
 import yt_dlp
+import telebot
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -120,7 +121,24 @@ def handle_message(message):
         update_user_stats(message.from_user.id, invalid=True)
         return
 
-    downloading_msg = bot.reply_to(message, "Downloading... Please wait.")
+    msg_list = [
+        " علی، تو زن داری؟ نامزد چی؟ پس تو چی داری ؟ یعنی تاحالا عاشق نشدی؟",
+        "جای اینکه بری به سالن قارچ سر بزنی اومدی اینجا لینک بازی میکنی ؟",
+        "سلام عشقای داداچ، پند امروز: باید از ناملایمتی ها گذشت و به شباهت ها توجه کرد. ناماستا قربه علی الله....",
+        "دانلود را برای طبقه مستمند مجانی میکنیم.",
+        "سلام عشقای داداچ، کاش وقت داشتم یه کم عشق و حال میکردیم ولی باید برم کلاس یوگا وینیاستا دارم، این دانلود هم خدمت شما. بایییییی",
+        "اگر غیر اون بود که به جای مارشمالو جیگرتو میزدم به سیخ",
+        "چطوری خط قرمز دوم هانیه",
+        "چطوری قطر؟ همیشه میانجی گری کردی همیشه هم موشک خوردی!",
+        "الان اون ضرر کرد یا من؟ اون خوشبخت شد یا من؟",
+        "قرارمون یادت نره دیر نکنی منتظرم.",
+        "جونمی ژون دختر",
+        "دختر برکت خداست، هر چی اومد خدا رو شکر",
+        "شما به عشق در نگاه اول ایمان داری؟",
+    ]
+    msg = random.choice(msg_list)
+    # msg = "Downloading... Please wait."
+    downloading_msg = bot.reply_to(message, msg)
     try:
         video_path_list = download_video(url)
         for i in range(len(video_path_list)):
@@ -147,7 +165,7 @@ def handle_message(message):
         log_to_topic(message, log_error_message, LOG_ERROR_TOPIC_ID)
         update_user_stats(message.from_user.id, error=True)
 
-    bot.delete_message(chat_id=message.chat.id, message_id=downloading_msg.message_id)
+    # bot.delete_message(chat_id=message.chat.id, message_id=downloading_msg.message_id)
 
 
 if __name__ == "__main__":
