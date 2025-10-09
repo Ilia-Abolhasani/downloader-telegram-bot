@@ -16,7 +16,8 @@ LOG_INVALID_TOPIC_ID = int(os.getenv("log_invalid_topic_id"))
 LOG_ERROR_TOPIC_ID = int(os.getenv("log_error_topic_id"))
 COOKIE_SESSION_ID = os.getenv("cookie_session_id")
 
-ALLOWED_USER = ["Ilia_Abolhasani", "azsh74"]
+ALLOWED_ID = [5564590560]
+ALLOWED_USER = ["Ilia_Abolhasani", "azsh74", "shaghayegh_kia1996", "Haniehshojaei"]
 bot = telebot.TeleBot(BOT_TOKEN)
 USER_DATA_FILE = "users_data.json"
 
@@ -102,8 +103,9 @@ def handle_message(message):
         if not msg.lower().startswith("download "):
             return  # Ignore unrelated messages in groups
 
-    if message.from_user.username not in ALLOWED_USER:
-        return
+    if message.from_user.id not in ALLOWED_ID:
+        if message.from_user.username not in ALLOWED_USER:
+            return
     url = message.text.strip()
     # Log the message to the logger bot
     log_text = (
