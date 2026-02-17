@@ -13,6 +13,6 @@ BOT_TOKEN = os.getenv("bot_api_key")
 bot = telebot.TeleBot(BOT_TOKEN)
 
 if __name__ == "__main__":
-    message = ""
-    message_id = 66067655
+    message = """"""
+    message_id = 7743223436
     bot.send_message(chat_id=message_id, text=message)
